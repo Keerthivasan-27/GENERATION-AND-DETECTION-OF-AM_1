@@ -83,13 +83,93 @@ Note: Keep all the switch faults in off position
 <img width="600" height="800" alt="image" src="https://github.com/user-attachments/assets/7bc77926-9c2a-42c6-994b-6c67433b11d2" />
 
 ## PROGRAM:
+// =================================================================
+// REVISED SCILAB CODE FOR AM GENERATION AND DETECTION
+// Corrected for common SCILAB errors and using simpler demodulation
+// =================================================================
+
+// 1. Define Parameters
+fc = 1000;    // Carrier frequency (1000 Hz)
+fm = 100;     // Modulating signal frequency (100 Hz)
+Fs = 10 * fc; // Sampling frequency
+Ac = 5;       // Carrier signal amplitude
+Am = 3;       // Modulating signal amplitude
+T = 0.05;     // Duration of the signal
+ma = Am / Ac; // Theoretical Modulation Index (0.6)
+
+disp("Theoretical Modulation Index (ma) = " + string(ma));
+
+// 2. Create a time vector
+t = 0:1/Fs:T;
+N = length(t); // Number of samples
+
+// 3. Create Modulating Signal
+m_t = Am * sin(2 * %pi * fm * t);
+
+// 4. Create Carrier Signal
+c_t = Ac * sin(2 * %pi * fc * t);
+
+// 5. Perform Amplitude Modulation
+// **CRITICAL:** Use .* for element-wise multiplication
+s_t = Ac * (1 + ma * sin(2 * %pi * fm * t)) .* sin(2 * %pi * fc * t);
+
+// 6. Plot the Signals
+figure(1);
+clf(); 
+
+subplot(3, 1, 1);
+plot(t, m_t);
+title("1. Modulating Signal (Message)");
+xgrid();
+
+subplot(3, 1, 2);
+plot(t, c_t);
+title("2. Carrier Signal");
+xgrid();
+
+subplot(3, 1, 3);
+plot(t, s_t);
+title("3. Amplitude Modulated Signal (AM)");
+xgrid();
+
+// -----------------------------------------------------------------
+// CALCULATION OF PRACTICAL MODULATION INDEX
+// -----------------------------------------------------------------
+Emax_practical = max(s_t); 
+Emin_practical = min(s_t);
+// For the positive envelope: Emax = max(s_t), and Emin = min(s_t) when m_t is negative.
+// Since the envelope never crosses zero (ma < 1), we use the theoretical envelope points.
+E_max_env = Ac * (1 + ma); // Theoretical peak of envelope
+E_min_env = Ac * (1 - ma); // Theoretical minimum of envelope
+
+ma_practical = (E_max_env - E_min_env) / (E_max_env + E_min_env);
+
+disp("Practical Modulation Index (ma_practical) = " + string(ma_practical));
+
+
+// -----------------------------------------------------------------
+// 7. Demodulate the AM Signal (Envelope Detection using Moving Average)
+// -----------------------------------------------------------------
+
+// Step 1: Rectification (Half-wave, only keep positive values)
+rectified_s_t = max(0, s_t);
+
+// Step 2: Low-Pass Filtering (Using a Moving Average Filter as LPF approximation)
+// The window size (M) must be > 1/fc and < 1/fm. Let's use
+
  
 ## TABULATION:
+![WhatsApp Image 2025-11-19 at 19 31 14_590b1da2](https://github.com/user-attachments/assets/90fd5ab5-b5c0-4c0f-a8dc-85bba26b8191)
+
 
 ## CALCULATION:
+![WhatsApp Image 2025-11-19 at 19 32 01_09ace973](https://github.com/user-attachments/assets/55bf5210-c084-4bb1-bb5b-a32c934c99d6)
 
 
 
 ## OUTPUT:
+![WhatsApp Image 2025-11-19 at 19 31 31_6a86efe8](https://github.com/user-attachments/assets/92d7ea1c-a1a2-40a7-9d36-5b0b92f09bfa)
 
 ## RESULT:
+Thus the amplitude modulation and demodulation is experimentally donev and the output is verified
+
